@@ -11,6 +11,8 @@ buttonContainer.addEventListener("click", (e) => {
         } else if (isEqualSign(e)) {
             showResult();
         }
+        calcDisplay.focus();
+        calcDisplay.scrollLeft = calcDisplay.scrollWidth;
     }
 })
 
@@ -44,29 +46,41 @@ function operate(a, b, operator) {
 }
 
 function clearDisplay() {
-    calcDisplay.textContent = "";
-    resultDisplay.textContent = "";
+    calcDisplay.value = "";
+    resultDisplay.value = "";
 }
 
 function showResult() {
-    const array = calcDisplay.textContent.split(" ");
-    if (array[2]) resultDisplay.textContent = operate(parseFloat(array[0]), parseFloat(array[2]), array[1]);
+    const array = calcDisplay.value.split(" ");
+    if (array[2]) {
+        if (resultDisplay.value === "") calcDisplay.value += " =";
+        resultDisplay.value = +operate(parseFloat(array[0]), parseFloat(array[2]), array[1]).toFixed(10);
+    }
+}
+
+function useResult(e) {
+    const array = calcDisplay.value.split(" ");
+    if (array[2]) {
+        calcDisplay.value = +operate(parseFloat(array[0]), parseFloat(array[2]), array[1]).toFixed(10) + " " + e.target.textContent + " ";
+    }
 }
 
 function updateDisplay(e) {
-    if (resultDisplay.textContent === "") {
+    if (resultDisplay.value === "") {
         if (isNumber(e)) {
-            calcDisplay.textContent += e.target.textContent;
+            calcDisplay.value += e.target.textContent;
         } else if (isOperator(e) && operatorAllowed()) {
-            calcDisplay.textContent += " " + e.target.textContent + " ";
-        }    
+            calcDisplay.value += " " + e.target.textContent + " ";
+        } else if (isOperator(e)) {
+            useResult(e);
+        }
     } else {
         if (isNumber(e)) {
             clearDisplay();
             updateDisplay(e);
         } else if (isOperator(e))
-            calcDisplay.textContent = resultDisplay.textContent + " " + e.target.textContent + " ";
-            resultDisplay.textContent = "";
+            calcDisplay.value = resultDisplay.value + " " + e.target.textContent + " ";
+            resultDisplay.value = "";
     }
 }
 
@@ -91,5 +105,5 @@ function isEqualSign(e) {
 }
 
 function operatorAllowed() {
-    return !calcDisplay.textContent.match(/[÷ || × || − || +]/) && calcDisplay.textContent.match(/[0-9]/)
+    return !calcDisplay.value.match(/[÷ || × || − || +]/) && calcDisplay.value.match(/[0-9]/)
 }
