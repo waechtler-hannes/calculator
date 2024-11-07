@@ -50,14 +50,23 @@ function clearDisplay() {
 
 function showResult() {
     const array = calcDisplay.textContent.split(" ");
-    resultDisplay.textContent = operate(parseFloat(array[0]), parseFloat(array[2]), array[1]);
+    if (array[2]) resultDisplay.textContent = operate(parseFloat(array[0]), parseFloat(array[2]), array[1]);
 }
 
 function updateDisplay(e) {
-    if (isNumber(e)) {
-        calcDisplay.textContent += e.target.textContent;
-    } else if (isOperator(e)) {
-        calcDisplay.textContent += " " + e.target.textContent + " ";
+    if (resultDisplay.textContent === "") {
+        if (isNumber(e)) {
+            calcDisplay.textContent += e.target.textContent;
+        } else if (isOperator(e) && operatorAllowed()) {
+            calcDisplay.textContent += " " + e.target.textContent + " ";
+        }    
+    } else {
+        if (isNumber(e)) {
+            clearDisplay();
+            updateDisplay(e);
+        } else if (isOperator(e))
+            calcDisplay.textContent = resultDisplay.textContent + " " + e.target.textContent + " ";
+            resultDisplay.textContent = "";
     }
 }
 
@@ -74,11 +83,13 @@ function isNumber(e) {
 }
 
 function isOperator(e) {
-    return !calcDisplay.textContent.match(/[÷ || × || − || +]/)
-        && calcDisplay.textContent.match(/[0-9]/)
-        && e.target.textContent.match(/[÷ || × || − || +]/);
+    return e.target.textContent.match(/[÷ || × || − || +]/);
 }
 
 function isEqualSign(e) {
     return e.target.textContent.match(/[=]/);
+}
+
+function operatorAllowed() {
+    return !calcDisplay.textContent.match(/[÷ || × || − || +]/) && calcDisplay.textContent.match(/[0-9]/)
 }
