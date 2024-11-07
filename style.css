@@ -48,8 +48,12 @@ button {
     flex-grow: 1;
 }
 
-.display {
-    font-size: 2.5em;
+.calc-display {
+    font-size: 2em;
+}
+
+.result-display {
+    font-size: 3em;
 }
 
 .button-container {
