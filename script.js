@@ -1,20 +1,24 @@
+// Selectors
+
 const calcDisplay = document.querySelector(".calc-display");
 const resultDisplay = document.querySelector(".result-display");
 const buttonContainer = document.querySelector(".button-container");
+
+// Event-listeners
 
 buttonContainer.addEventListener("click", (e) => {
     if (isButton(e)) {
         if (isClear(e)) {
             clearDisplay();
-        } else if (isNumber(e) || isOperator(e) || isDot(e)) {
+        } else {
             updateDisplay(e);
-        } else if (isEqualSign(e)) {
-            showResult();
         }
         calcDisplay.focus();
         calcDisplay.scrollLeft = calcDisplay.scrollWidth;
     }
 })
+
+// Calculations
 
 function add(a, b) {
     return a + b;
@@ -45,16 +49,31 @@ function operate(a, b, operator) {
     }
 }
 
+// Displaychanges
+
 function clearDisplay() {
     calcDisplay.value = "";
     resultDisplay.value = "";
 }
 
+function updateDisplay(e) {
+    if (isNumber(e)) {
+        appendNumber(e);
+    } else if (isOperator(e) && operatorAllowed()) {
+        appendOperator(e);
+    } else if (isDot(e) && dotAllowed()) {
+        appendDot(e);
+    } else if (isEqualSign(e) && equalSignAllowed()) {
+        appendEqualSign(e);
+        showResult();
+    }
+}
+
+// Results
+
 function showResult() {
     const array = calcDisplay.value.split(" ");
     if (array[2]) {
-        if (calcDisplay.value.at(-1) === ".") calcDisplay.value += "0";
-        if (resultDisplay.value === "") calcDisplay.value += " =";
         resultDisplay.value = +operate(parseFloat(array[0]), parseFloat(array[2]), array[1]).toFixed(15);
     }
 }
@@ -66,30 +85,7 @@ function useResult(e) {
     }
 }
 
-function updateDisplay(e) {
-    if (resultDisplay.value === "") {
-        if (isDot(e) && (calcDisplay.value === "" || calcDisplay.value.at(-1) === " ")) {
-            calcDisplay.value += 0 + e.target.textContent;
-        } else if (isNumber(e) || (isDot(e) && dotAllowed())) {
-            calcDisplay.value += e.target.textContent;
-        } else if (isOperator(e) && operatorAllowed()) {
-            if (calcDisplay.value.at(-1) === ".") {
-                calcDisplay.value += "0 " + e.target.textContent + " ";
-            } else {
-                calcDisplay.value += " " + e.target.textContent + " ";
-            }
-        } else if (isOperator(e)) {
-            useResult(e);
-        }
-    } else {
-        if (isNumber(e)) {
-            clearDisplay();
-            updateDisplay(e);
-        } else if (isOperator(e))
-            calcDisplay.value = resultDisplay.value + " " + e.target.textContent + " ";
-            resultDisplay.value = "";
-    }
-}
+// Button-checks
 
 function isButton(e) {
     return e.target.type === "submit";
@@ -115,10 +111,55 @@ function isDot(e) {
     return e.target.textContent.match(/[.]/);
 }
 
+// Permissions
+
 function dotAllowed() {
-    return !(calcDisplay.value.match(/[.].*[+].*[.]/) || calcDisplay.value.match(/[+].*[.]/) || (calcDisplay.value.match(/[.]/) && !calcDisplay.value.match(/[+]/)));
+    return !(calcDisplay.value.match(/[.].*[÷ || × || − || +].*[.]/) || calcDisplay.value.match(/[÷ || × || − || +].*[.]/) || (calcDisplay.value.match(/[.]/) && !calcDisplay.value.match(/[÷ || × || − || +]/)));
 }
 
 function operatorAllowed() {
-    return !calcDisplay.value.match(/[÷ || × || − || +]/) && calcDisplay.value.match(/[0-9]/);
+    return calcDisplay.value != "";
+}
+
+function equalSignAllowed() {
+    return calcDisplay.value.match(/[0-9].*[÷ || × || − || +].*[0-9]/) && !calcDisplay.value.match(/[=]/);
+}
+
+// Append characters
+
+function appendNumber(e) {
+    if (resultDisplay.value === "") {
+        calcDisplay.value += e.target.textContent;
+    } else {
+        clearDisplay();
+        updateDisplay(e);
+    }
+}
+
+function appendOperator(e) {
+    if (calcDisplay.value.at(-1) === " ") {
+        calcDisplay.value = calcDisplay.value.slice(0, -3);
+        appendOperator(e);
+    } else if (calcDisplay.value.match(/[0-9].*[÷ || × || − || +].*[0-9]/) && resultDisplay.value === ""){
+        useResult(e);
+    } else if (resultDisplay.value === "") {
+        if (calcDisplay.value.at(-1) === ".") calcDisplay.value += "0"
+            calcDisplay.value += " " + e.target.textContent + " ";
+    } else {
+        calcDisplay.value = resultDisplay.value + " " + e.target.textContent + " ";
+        resultDisplay.value = "";
+    }
+}
+
+function appendDot(e) {
+    if(calcDisplay.value === "" || calcDisplay.value.at(-1) === " ") {
+        calcDisplay.value += 0 + e.target.textContent;
+    } else {
+        calcDisplay.value += e.target.textContent;
+    }
+}
+
+function appendEqualSign(e) {
+    if (calcDisplay.value.at(-1) === ".") calcDisplay.value += "0";
+    calcDisplay.value += " =";
 }
