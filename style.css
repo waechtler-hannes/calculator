@@ -95,12 +95,16 @@ button {
     background-color: orange;
 }
 
-.number {
+.number, .dot {
     background-color: rgb(49, 49, 49);
 }
 
-#zero, #clear {
+#clear {
     flex-basis: 75%;
+}
+
+#zero {
+    flex-basis: 50%;
 }
 
 #zero button, #clear button {

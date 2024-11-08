@@ -6,7 +6,7 @@ buttonContainer.addEventListener("click", (e) => {
     if (isButton(e)) {
         if (isClear(e)) {
             clearDisplay();
-        } else if (isNumber(e) || isOperator(e)) {
+        } else if (isNumber(e) || isOperator(e) || isDot(e)) {
             updateDisplay(e);
         } else if (isEqualSign(e)) {
             showResult();
@@ -53,24 +53,31 @@ function clearDisplay() {
 function showResult() {
     const array = calcDisplay.value.split(" ");
     if (array[2]) {
+        if (calcDisplay.value.at(-1) === ".") calcDisplay.value += "0";
         if (resultDisplay.value === "") calcDisplay.value += " =";
-        resultDisplay.value = +operate(parseFloat(array[0]), parseFloat(array[2]), array[1]).toFixed(10);
+        resultDisplay.value = +operate(parseFloat(array[0]), parseFloat(array[2]), array[1]).toFixed(15);
     }
 }
 
 function useResult(e) {
     const array = calcDisplay.value.split(" ");
     if (array[2]) {
-        calcDisplay.value = +operate(parseFloat(array[0]), parseFloat(array[2]), array[1]).toFixed(10) + " " + e.target.textContent + " ";
+        calcDisplay.value = +operate(parseFloat(array[0]), parseFloat(array[2]), array[1]).toFixed(15) + " " + e.target.textContent + " ";
     }
 }
 
 function updateDisplay(e) {
     if (resultDisplay.value === "") {
-        if (isNumber(e)) {
+        if (isDot(e) && (calcDisplay.value === "" || calcDisplay.value.at(-1) === " ")) {
+            calcDisplay.value += 0 + e.target.textContent;
+        } else if (isNumber(e) || (isDot(e) && dotAllowed())) {
             calcDisplay.value += e.target.textContent;
         } else if (isOperator(e) && operatorAllowed()) {
-            calcDisplay.value += " " + e.target.textContent + " ";
+            if (calcDisplay.value.at(-1) === ".") {
+                calcDisplay.value += "0 " + e.target.textContent + " ";
+            } else {
+                calcDisplay.value += " " + e.target.textContent + " ";
+            }
         } else if (isOperator(e)) {
             useResult(e);
         }
@@ -93,7 +100,7 @@ function isClear(e) {
 }
 
 function isNumber(e) {
-    return e.target.textContent.match(/[0-9]/)
+    return e.target.textContent.match(/[0-9]/);
 }
 
 function isOperator(e) {
@@ -104,6 +111,14 @@ function isEqualSign(e) {
     return e.target.textContent.match(/[=]/);
 }
 
+function isDot(e) {
+    return e.target.textContent.match(/[.]/);
+}
+
+function dotAllowed() {
+    return !(calcDisplay.value.match(/[.].*[+].*[.]/) || calcDisplay.value.match(/[+].*[.]/) || (calcDisplay.value.match(/[.]/) && !calcDisplay.value.match(/[+]/)));
+}
+
 function operatorAllowed() {
-    return !calcDisplay.value.match(/[÷ || × || − || +]/) && calcDisplay.value.match(/[0-9]/)
+    return !calcDisplay.value.match(/[÷ || × || − || +]/) && calcDisplay.value.match(/[0-9]/);
 }
