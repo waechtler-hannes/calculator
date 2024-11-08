@@ -9,6 +9,8 @@ const buttonContainer = document.querySelector(".button-container");
 buttonContainer.addEventListener("click", (e) => {
     if (isButton(e)) {
         if (isClear(e)) {
+            removeLastChar();
+        } else if (isClearAll(e)) {
             clearDisplay();
         } else {
             updateDisplay(e);
@@ -69,6 +71,18 @@ function updateDisplay(e) {
     }
 }
 
+function removeLastChar() {
+    if (calcDisplay.value.at(-1) === " ") {
+        removeOperator();
+    } else if (calcDisplay.value.at(-1) != "=") {
+        calcDisplay.value = calcDisplay.value.slice(0, -1);
+    }
+}
+
+function removeOperator() {
+    calcDisplay.value = calcDisplay.value.slice(0, -3);
+}
+
 // Results
 
 function showResult() {
@@ -93,6 +107,10 @@ function isButton(e) {
 
 function isClear(e) {
     return e.target.textContent === "C";
+}
+
+function isClearAll(e) {
+    return e.target.textContent === "AC";
 }
 
 function isNumber(e) {
@@ -138,7 +156,7 @@ function appendNumber(e) {
 
 function appendOperator(e) {
     if (calcDisplay.value.at(-1) === " ") {
-        calcDisplay.value = calcDisplay.value.slice(0, -3);
+        removeOperator();
         appendOperator(e);
     } else if (calcDisplay.value.match(/[0-9].*[÷ || × || − || +].*[0-9]/) && resultDisplay.value === ""){
         useResult(e);
