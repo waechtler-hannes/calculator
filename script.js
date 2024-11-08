@@ -8,15 +8,35 @@ const buttonContainer = document.querySelector(".button-container");
 
 buttonContainer.addEventListener("click", (e) => {
     if (isButton(e)) {
-        if (isClear(e)) {
+        let eKey = e.target.textContent;
+        if (isClear(eKey)) {
             removeLastChar();
-        } else if (isClearAll(e)) {
+        } else if (isClearAll(eKey)) {
             clearDisplay();
         } else {
-            updateDisplay(e);
+            updateDisplay(eKey);
         }
         calcDisplay.focus();
         calcDisplay.scrollLeft = calcDisplay.scrollWidth;
+    }
+})
+
+document.addEventListener("keydown", (e) => {
+    let eKey = e.key;
+    if (isNumber(eKey) || isDot(eKey) || isEqualSign(eKey) || isPlus(eKey)) {
+        updateDisplay(eKey)
+    } else if (isMinus(eKey)) {
+        updateDisplay("−");
+    } else if (isMulti(eKey)) {
+        updateDisplay("×");
+    } else if (isSlash(eKey)) {
+        updateDisplay("÷");
+    } else if (isEnter(eKey)) {
+        updateDisplay("=");
+    } else if (isBackspace(eKey)) {
+        removeLastChar();
+    } else if (isDelete(eKey)) {
+        clearDisplay();
     }
 })
 
@@ -58,15 +78,15 @@ function clearDisplay() {
     resultDisplay.value = "";
 }
 
-function updateDisplay(e) {
-    if (isNumber(e)) {
-        appendNumber(e);
-    } else if (isOperator(e) && operatorAllowed()) {
-        appendOperator(e);
-    } else if (isDot(e) && dotAllowed()) {
-        appendDot(e);
-    } else if (isEqualSign(e) && equalSignAllowed()) {
-        appendEqualSign(e);
+function updateDisplay(eKey) {
+    if (isNumber(eKey)) {
+        appendNumber(eKey);
+    } else if (isOperator(eKey) && operatorAllowed()) {
+        appendOperator(eKey);
+    } else if (isDot(eKey) && dotAllowed()) {
+        appendDot(eKey);
+    } else if (isEqualSign(eKey) && equalSignAllowed()) {
+        appendEqualSign(eKey);
         showResult();
     }
 }
@@ -92,10 +112,10 @@ function showResult() {
     }
 }
 
-function useResult(e) {
+function useResult(eKey) {
     const array = calcDisplay.value.split(" ");
     if (array[2]) {
-        calcDisplay.value = +operate(parseFloat(array[0]), parseFloat(array[2]), array[1]).toFixed(15) + " " + e.target.textContent + " ";
+        calcDisplay.value = +operate(parseFloat(array[0]), parseFloat(array[2]), array[1]).toFixed(15) + " " + eKey + " ";
     }
 }
 
@@ -105,28 +125,58 @@ function isButton(e) {
     return e.target.type === "submit";
 }
 
-function isClear(e) {
-    return e.target.textContent === "C";
+function isClear(eKey) {
+    return eKey === "C";
 }
 
-function isClearAll(e) {
-    return e.target.textContent === "AC";
+function isClearAll(eKey) {
+    return eKey === "AC";
 }
 
-function isNumber(e) {
-    return e.target.textContent.match(/[0-9]/);
+function isNumber(eKey) {
+    return eKey.match(/[0-9]/);
 }
 
-function isOperator(e) {
-    return e.target.textContent.match(/[÷ || × || − || +]/);
+function isOperator(eKey) {
+    return eKey.match(/[÷ || × || − || +]/);
 }
 
-function isEqualSign(e) {
-    return e.target.textContent.match(/[=]/);
+function isEqualSign(eKey) {
+    return eKey.match(/[=]/);
 }
 
-function isDot(e) {
-    return e.target.textContent.match(/[.]/);
+function isDot(eKey) {
+    return eKey.match(/[.]/);
+}
+
+// Keyboard-checks
+
+function isBackspace(eKey) {
+    return eKey === "Backspace";
+}
+
+function isDelete(eKey) {
+    return eKey === "Delete";
+}
+
+function isEnter(eKey) {
+    return eKey === "Enter";
+}
+
+function isMinus(eKey) {
+    return eKey === "-";
+}
+
+function isPlus(eKey) {
+    return eKey === "+";
+}
+
+function isMulti(eKey) {
+    return eKey === "*";
+}
+
+function isSlash(eKey) {
+    return eKey === "/";
 }
 
 // Permissions
@@ -145,39 +195,39 @@ function equalSignAllowed() {
 
 // Append characters
 
-function appendNumber(e) {
+function appendNumber(eKey) {
     if (resultDisplay.value === "") {
-        calcDisplay.value += e.target.textContent;
+        calcDisplay.value += eKey;
     } else {
         clearDisplay();
-        updateDisplay(e);
+        updateDisplay(eKey);
     }
 }
 
-function appendOperator(e) {
+function appendOperator(eKey) {
     if (calcDisplay.value.at(-1) === " ") {
         removeOperator();
-        appendOperator(e);
+        appendOperator(eKey);
     } else if (calcDisplay.value.match(/[0-9].*[÷ || × || − || +].*[0-9]/) && resultDisplay.value === ""){
-        useResult(e);
+        useResult(eKey);
     } else if (resultDisplay.value === "") {
         if (calcDisplay.value.at(-1) === ".") calcDisplay.value += "0"
-            calcDisplay.value += " " + e.target.textContent + " ";
+            calcDisplay.value += " " + eKey + " ";
     } else {
-        calcDisplay.value = resultDisplay.value + " " + e.target.textContent + " ";
+        calcDisplay.value = resultDisplay.value + " " + eKey + " ";
         resultDisplay.value = "";
     }
 }
 
-function appendDot(e) {
+function appendDot(eKey) {
     if(calcDisplay.value === "" || calcDisplay.value.at(-1) === " ") {
-        calcDisplay.value += 0 + e.target.textContent;
+        calcDisplay.value += 0 + eKey;
     } else {
-        calcDisplay.value += e.target.textContent;
+        calcDisplay.value += eKey;
     }
 }
 
-function appendEqualSign(e) {
+function appendEqualSign(eKey) {
     if (calcDisplay.value.at(-1) === ".") calcDisplay.value += "0";
     calcDisplay.value += " =";
 }
